@@ -625,6 +625,63 @@
 
 
         /* =====================================================
+           DRUCK / EXPORT
+           ===================================================== */
+
+        @media print {
+
+            body {
+
+                margin: 0;
+
+                padding: 0;
+
+                background: white;
+
+                color: #000;
+
+            }
+
+
+            body > .container {
+
+                width: 100%;
+
+                margin: 0;
+
+                box-shadow: none;
+
+            }
+
+
+            body > .container > *:not(.tabelle-container) {
+
+                display: none !important;
+
+            }
+
+
+            .tabelle-container {
+
+                box-shadow: none;
+
+                border-radius: 0;
+
+                overflow: visible;
+
+            }
+
+
+            .tabelle-container table {
+
+                min-width: 0;
+
+            }
+
+        }
+
+
+        /* =====================================================
            MOBILE
            ===================================================== */
 
@@ -789,6 +846,16 @@
         >
 
             Stundenplan zurücksetzen
+
+        </button>
+
+
+        <button
+            class="aktion-button"
+            id="exportButton"
+        >
+
+            Stundenplan exportieren
 
         </button>
 
@@ -2552,6 +2619,24 @@ document
 
     );
 
+
+document
+
+    .getElementById(
+        "exportButton"
+    )
+
+    .addEventListener(
+
+        "click",
+
+        function() {
+
+            window.print();
+
+        }
+
+    );
 
 
 /* =========================================================

@@ -1,0 +1,2576 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Mein Stundenplan</title>
+
+
+    <style>
+
+        /* =====================================================
+           GRUNDLAYOUT
+           ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            padding: 30px;
+
+            background: #f4f5f7;
+
+            color: #202124;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+        }
+
+
+        .container {
+
+            max-width: 1500px;
+
+            margin: 0 auto;
+
+        }
+
+
+        h1 {
+
+            margin: 0 0 8px;
+
+            font-size: 34px;
+
+        }
+
+
+        .beschreibung {
+
+            margin: 0 0 25px;
+
+            color: #666;
+
+        }
+
+
+        /* =====================================================
+           WOCHENLEISTE
+           ===================================================== */
+
+        .wochenleiste {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 15px;
+
+            padding: 15px 18px;
+
+            background: white;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 3px 12px rgba(0, 0, 0, .06);
+
+        }
+
+
+        .wochenanzeige {
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+        }
+
+
+        .wochen-button {
+
+            border: none;
+
+            padding: 10px 16px;
+
+            border-radius: 8px;
+
+            background: #222;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+        }
+
+
+        .wochen-button:hover {
+
+            background: #444;
+
+        }
+
+
+        /* =====================================================
+           TABELLE
+           ===================================================== */
+
+        .tabelle-container {
+
+            overflow-x: auto;
+
+            background: white;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 25px rgba(0, 0, 0, .08);
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            min-width: 1050px;
+
+            border-collapse: collapse;
+
+        }
+
+
+        th,
+        td {
+
+            border: 1px solid #d8dadd;
+
+        }
+
+
+        th {
+
+            height: 60px;
+
+            background: #f0f1f3;
+
+            font-size: 17px;
+
+        }
+
+
+        .zeit-spalte {
+
+            width: 155px;
+
+            min-width: 155px;
+
+        }
+
+
+        .zeit {
+
+            padding: 10px;
+
+            background: #fafafa;
+
+            text-align: center;
+
+        }
+
+
+        .stunden-nummer {
+
+            display: block;
+
+            font-weight: bold;
+
+            font-size: 15px;
+
+        }
+
+
+        .uhrzeit {
+
+            display: block;
+
+            margin-top: 4px;
+
+            color: #777;
+
+            font-size: 12px;
+
+        }
+
+
+        /* =====================================================
+           FACH-KÄSTEN
+           ===================================================== */
+
+        .fach-kasten {
+
+            position: relative;
+
+            width: 100%;
+
+            height: 72px;
+
+            border: none;
+
+            background: #fff;
+
+            cursor: pointer;
+
+            font-family: inherit;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            transition:
+                transform .12s ease,
+                box-shadow .12s ease;
+
+        }
+
+
+        .fach-kasten:hover {
+
+            transform: scale(.98);
+
+            box-shadow:
+                inset 0 0 0 2px
+                rgba(0, 0, 0, .15);
+
+        }
+
+
+        .fach-kasten.leer {
+
+            background: #fff;
+
+        }
+
+
+        /* =====================================================
+           FACHNAME + RAUM
+           ===================================================== */
+
+        .fach-name {
+
+            display: block;
+
+            text-align: center;
+
+            font-weight: bold;
+
+        }
+
+
+        .raum {
+
+            display: block;
+
+            margin-top: 4px;
+
+            text-align: center;
+
+            font-size: 11px;
+
+            font-weight: normal;
+
+            opacity: .75;
+
+        }
+
+
+        /* =====================================================
+           MITTAGSPAUSE
+           ===================================================== */
+
+        .mittagspause {
+
+            height: 72px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            background: #eeeeee;
+
+            color: #555;
+
+            font-weight: bold;
+
+            font-size: 14px;
+
+        }
+
+
+        /* =====================================================
+           SPEZIALFALL
+           ===================================================== */
+
+        .fach-kasten.spezialfall {
+
+            box-shadow:
+
+                inset 0 0 0 3px #202124,
+
+                0 0 0 2px #ffffff;
+
+        }
+
+
+        .wochen-marker {
+
+            position: absolute;
+
+            top: 6px;
+
+            right: 6px;
+
+            width: 22px;
+
+            height: 22px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            border-radius: 6px;
+
+            background:
+                rgba(255, 255, 255, .9);
+
+            color: #222;
+
+            font-size: 11px;
+
+            font-weight: 900;
+
+        }
+
+
+        /* =====================================================
+           BUTTONS
+           ===================================================== */
+
+        .aktionen {
+
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            margin-top: 20px;
+
+        }
+
+
+        .aktion-button {
+
+            border: none;
+
+            border-radius: 9px;
+
+            padding: 11px 16px;
+
+            background: #222;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+        }
+
+
+        .aktion-button:hover {
+
+            background: #444;
+
+        }
+
+
+        .aktion-button.grau {
+
+            background: #e2e3e6;
+
+            color: #222;
+
+        }
+
+
+        .aktion-button.grau:hover {
+
+            background: #d5d6d9;
+
+        }
+
+
+        /* =====================================================
+           LEGENDE
+           ===================================================== */
+
+        .legende {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            margin-top: 20px;
+
+        }
+
+
+        .legende-fach {
+
+            padding: 7px 11px;
+
+            border-radius: 20px;
+
+            border: 1px solid #d5d5d5;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+        }
+
+
+        /* =====================================================
+           DIALOG
+           ===================================================== */
+
+        dialog {
+
+            width:
+                min(500px, calc(100% - 30px));
+
+            padding: 0;
+
+            border: none;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 20px 80px
+                rgba(0, 0, 0, .3);
+
+        }
+
+
+        dialog::backdrop {
+
+            background:
+                rgba(0, 0, 0, .45);
+
+        }
+
+
+        .dialog-inhalt {
+
+            padding: 25px;
+
+        }
+
+
+        .dialog-inhalt h2 {
+
+            margin:
+                0 0 8px;
+
+        }
+
+
+        .dialog-beschreibung {
+
+            margin:
+                0 0 20px;
+
+            color: #666;
+
+        }
+
+
+        .formular-zeile {
+
+            margin-bottom: 15px;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: bold;
+
+            font-size: 14px;
+
+        }
+
+
+        select {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border:
+                1px solid #ccc;
+
+            border-radius: 8px;
+
+            background: white;
+
+            font-size: 15px;
+
+        }
+
+
+        .dialog-buttons {
+
+            display: flex;
+
+            justify-content: flex-end;
+
+            gap: 10px;
+
+            margin-top: 20px;
+
+        }
+
+
+        .dialog-button {
+
+            padding: 10px 15px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+        }
+
+
+        .dialog-button.abbrechen {
+
+            background: #e6e6e6;
+
+        }
+
+
+        .dialog-button.speichern {
+
+            background: #222;
+
+            color: white;
+
+        }
+
+
+        /* =====================================================
+           SPEZIALFALL-BEREICH
+           ===================================================== */
+
+        #spezialfallBereich {
+
+            display: none;
+
+            margin-top: 15px;
+
+            padding: 15px;
+
+            background: #f4f5f7;
+
+            border-radius: 10px;
+
+            border: 1px solid #ddd;
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (max-width: 700px) {
+
+            body {
+
+                padding: 15px;
+
+            }
+
+
+            h1 {
+
+                font-size: 27px;
+
+            }
+
+
+            .wochenleiste {
+
+                align-items: flex-start;
+
+                flex-direction: column;
+
+                gap: 12px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- =====================================================
+         TITEL
+         ===================================================== -->
+
+    <h1>
+        Mein Stundenplan
+    </h1>
+
+
+    <p class="beschreibung">
+
+        Klicke auf einen Kasten und
+        wähle dein Fach aus.
+
+    </p>
+
+
+    <!-- =====================================================
+         WOCHENLEISTE
+         ===================================================== -->
+
+    <div class="wochenleiste">
+
+
+        <div
+            class="wochenanzeige"
+            id="wochenAnzeige"
+        >
+
+            Aktuelle Woche:
+            Gerade Woche (G)
+
+        </div>
+
+
+        <button
+            class="wochen-button"
+            id="wochenAendernButton"
+        >
+
+            Woche ändern
+
+        </button>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         STUNDENPLAN
+         ===================================================== -->
+
+    <div class="tabelle-container">
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    <th class="zeit-spalte">
+
+                        Stunde / Zeit
+
+                    </th>
+
+
+                    <th>
+                        Montag
+                    </th>
+
+
+                    <th>
+                        Dienstag
+                    </th>
+
+
+                    <th>
+                        Mittwoch
+                    </th>
+
+
+                    <th>
+                        Donnerstag
+                    </th>
+
+
+                    <th>
+                        Freitag
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody
+                id="stundenplan"
+            ></tbody>
+
+
+        </table>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         BUTTON
+         ===================================================== -->
+
+    <div class="aktionen">
+
+
+        <button
+            class="aktion-button grau"
+            id="zuruecksetzenButton"
+        >
+
+            Stundenplan zurücksetzen
+
+        </button>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         LEGENDE
+         ===================================================== -->
+
+    <div
+        class="legende"
+        id="legende"
+    ></div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     FACH-DIALOG
+     ========================================================= -->
+
+<dialog id="fachDialog">
+
+
+    <form
+        method="dialog"
+        class="dialog-inhalt"
+        id="fachFormular"
+    >
+
+
+        <h2>
+            Fach auswählen
+        </h2>
+
+
+        <p
+            class="dialog-beschreibung"
+            id="fachInfo"
+        >
+
+            Wähle ein Fach aus.
+
+        </p>
+
+
+        <!-- =================================================
+             HAUPT-DROPDOWN
+             ================================================= -->
+
+        <div class="formular-zeile">
+
+
+            <label for="fachAuswahl">
+
+                Fach
+
+            </label>
+
+
+            <select
+                id="fachAuswahl"
+            >
+
+
+                <option value="">
+
+                    – Kein Fach –
+
+                </option>
+
+
+                <option value="SPEZIALFALL">
+
+                    ⭐ Spezialfall
+
+                </option>
+
+
+            </select>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             SPEZIALFALL
+             ================================================= -->
+
+        <div
+            id="spezialfallBereich"
+        >
+
+
+            <div class="formular-zeile">
+
+
+                <label
+                    for="spezialFachAuswahl"
+                >
+
+                    Fach des Spezialfalls
+
+                </label>
+
+
+                <select
+                    id="spezialFachAuswahl"
+                >
+
+
+                    <option value="">
+
+                        – Fach auswählen –
+
+                    </option>
+
+
+                </select>
+
+
+            </div>
+
+
+
+            <div class="formular-zeile">
+
+
+                <label
+                    for="spezialWocheAuswahl"
+                >
+
+                    Wochenart
+
+                </label>
+
+
+                <select
+                    id="spezialWocheAuswahl"
+                >
+
+
+                    <option value="gerade">
+
+                        Gerade Woche (G)
+
+                    </option>
+
+
+                    <option value="ungerade">
+
+                        Ungerade Woche (U)
+
+                    </option>
+
+
+                </select>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             BUTTONS
+             ================================================= -->
+
+        <div class="dialog-buttons">
+
+
+            <button
+                type="button"
+                class="dialog-button abbrechen"
+                id="fachAbbrechen"
+            >
+
+                Abbrechen
+
+            </button>
+
+
+            <button
+                type="submit"
+                class="dialog-button speichern"
+            >
+
+                Speichern
+
+            </button>
+
+
+        </div>
+
+
+    </form>
+
+
+</dialog>
+
+
+
+<!-- =========================================================
+     WOCHEN-DIALOG
+     ========================================================= -->
+
+<dialog id="wochenDialog">
+
+
+    <form
+        method="dialog"
+        class="dialog-inhalt"
+        id="wochenFormular"
+    >
+
+
+        <h2>
+            Wochenart auswählen
+        </h2>
+
+
+        <p class="dialog-beschreibung">
+
+            Welche Woche ist aktuell?
+
+        </p>
+
+
+        <select
+            id="wochenAuswahl"
+        >
+
+
+            <option value="gerade">
+
+                Gerade Woche (G)
+
+            </option>
+
+
+            <option value="ungerade">
+
+                Ungerade Woche (U)
+
+            </option>
+
+
+        </select>
+
+
+        <div class="dialog-buttons">
+
+
+            <button
+                type="button"
+                class="dialog-button abbrechen"
+                id="wochenAbbrechen"
+            >
+
+                Abbrechen
+
+            </button>
+
+
+            <button
+                type="submit"
+                class="dialog-button speichern"
+            >
+
+                Speichern
+
+            </button>
+
+
+        </div>
+
+
+    </form>
+
+
+</dialog>
+
+
+
+<script>
+
+
+/* =========================================================
+   FÄCHER + FARBEN + RÄUME
+
+   Die Räume sind fest im Code gespeichert.
+   Sie werden NICHT abgefragt.
+   ========================================================= */
+
+const faecher = [
+
+
+    {
+        name: "Sport",
+        farbe: "#BAA6E0",
+        raum: ""
+    },
+
+
+    {
+        name: "Religion",
+        farbe: "#FFFFFF",
+        raum: "A111"
+    },
+
+
+    {
+        name: "Deutsch",
+        farbe: "#FF5F67",
+        raum: "A111"
+    },
+
+
+    {
+        name: "Musik",
+        farbe: "#FF9F49",
+        raum: "A012"
+    },
+
+
+    {
+        name: "Französisch",
+        farbe: "#FC8CC7",
+        raum: "A112"
+    },
+
+
+    {
+        name: "Englisch",
+        farbe: "#305BB0",
+        raum: "A111"
+    },
+
+
+    {
+        name: "Geschichte",
+        farbe: "#6F44A3",
+        raum: "J13"
+    },
+
+
+    {
+        name: "Politik und Wirtschaft",
+        farbe: "#1C9434",
+        raum: "A111"
+    },
+
+
+    {
+        name: "Informatik",
+        farbe: "#3BD0CB",
+        raum: "AK14"
+    },
+
+
+    {
+        name: "Mathematik",
+        farbe: "#F7CA1D",
+        raum: "A215"
+    },
+
+
+    {
+        name: "Chemie",
+        farbe: "#BEBBB5",
+        raum: "A205"
+    }
+
+];
+
+
+
+/* =========================================================
+   STUNDEN
+
+   8. Stunde: 13:40–14:25
+   9. Stunde: 14:25–15:10
+   ========================================================= */
+
+const stunden = [
+
+
+    {
+        nummer: 1,
+        von: "7:45",
+        bis: "8:30"
+    },
+
+
+    {
+        nummer: 2,
+        von: "8:35",
+        bis: "9:20"
+    },
+
+
+    {
+        nummer: 3,
+        von: "9:35",
+        bis: "10:20"
+    },
+
+
+    {
+        nummer: 4,
+        von: "10:20",
+        bis: "11:05"
+    },
+
+
+    {
+        nummer: 5,
+        von: "11:20",
+        bis: "12:05"
+    },
+
+
+    {
+        nummer: 6,
+        von: "12:10",
+        bis: "12:55"
+    },
+
+
+    {
+        nummer: 7,
+        von: "12:55",
+        bis: "13:40",
+        mittagspause: true
+    },
+
+
+    {
+        nummer: 8,
+        von: "13:40",
+        bis: "14:25"
+    },
+
+
+    {
+        nummer: 9,
+        von: "14:25",
+        bis: "15:10"
+    },
+
+
+    {
+        nummer: 10,
+        von: "15:20",
+        bis: "16:00"
+    },
+
+
+    {
+        nummer: 11,
+        von: "16:00",
+        bis: "16:45"
+    }
+
+];
+
+
+
+/* =========================================================
+   WOCHENTAGE
+   ========================================================= */
+
+const tage = [
+
+    "Montag",
+    "Dienstag",
+    "Mittwoch",
+    "Donnerstag",
+    "Freitag"
+
+];
+
+
+
+/* =========================================================
+   VARIABLEN
+   ========================================================= */
+
+let aktuelleWoche = "gerade";
+
+let aktiverTag = null;
+
+let aktiveStunde = null;
+
+let stundenplan = {};
+
+let spezialfaelle = {};
+
+
+
+/* =========================================================
+   DATEN LADEN
+   ========================================================= */
+
+function datenLaden() {
+
+
+    const plan =
+        localStorage.getItem(
+            "meinStundenplan"
+        );
+
+
+    const spezial =
+        localStorage.getItem(
+            "meineSpezialfaelle"
+        );
+
+
+    const woche =
+        localStorage.getItem(
+            "meineAktuelleWoche"
+        );
+
+
+    if (plan) {
+
+        stundenplan =
+            JSON.parse(plan);
+
+    }
+
+
+    if (spezial) {
+
+        spezialfaelle =
+            JSON.parse(spezial);
+
+    }
+
+
+    if (woche) {
+
+        aktuelleWoche =
+            woche;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   DATEN SPEICHERN
+   ========================================================= */
+
+function datenSpeichern() {
+
+
+    localStorage.setItem(
+
+        "meinStundenplan",
+
+        JSON.stringify(
+            stundenplan
+        )
+
+    );
+
+
+    localStorage.setItem(
+
+        "meineSpezialfaelle",
+
+        JSON.stringify(
+            spezialfaelle
+        )
+
+    );
+
+
+    localStorage.setItem(
+
+        "meineAktuelleWoche",
+
+        aktuelleWoche
+
+    );
+
+}
+
+
+
+/* =========================================================
+   SCHRIFTFARBE
+   ========================================================= */
+
+function passendeSchriftfarbe(hex) {
+
+
+    hex =
+        hex.replace("#", "");
+
+
+    const r =
+        parseInt(
+            hex.substring(0, 2),
+            16
+        );
+
+
+    const g =
+        parseInt(
+            hex.substring(2, 4),
+            16
+        );
+
+
+    const b =
+        parseInt(
+            hex.substring(4, 6),
+            16
+        );
+
+
+    const helligkeit =
+
+        (
+            r * 299 +
+            g * 587 +
+            b * 114
+        ) / 1000;
+
+
+    return helligkeit > 165
+
+        ? "#202124"
+
+        : "#FFFFFF";
+
+}
+
+
+
+/* =========================================================
+   FACH INFORMATIONEN
+   ========================================================= */
+
+function fachInformation(fach) {
+
+
+    return faecher.find(
+
+        element =>
+            element.name === fach
+
+    );
+
+}
+
+
+
+/* =========================================================
+   FACHFARBE
+   ========================================================= */
+
+function fachFarbe(fach) {
+
+
+    const info =
+        fachInformation(fach);
+
+
+    return info
+
+        ? info.farbe
+
+        : "#FFFFFF";
+
+}
+
+
+
+/* =========================================================
+   FACH-RAUM
+   ========================================================= */
+
+function fachRaum(fach) {
+
+
+    const info =
+        fachInformation(fach);
+
+
+    return info
+
+        ? info.raum
+
+        : "";
+
+}
+
+
+
+/* =========================================================
+   DROPDOWNS FÜLLEN
+   ========================================================= */
+
+function dropdownsFuellen() {
+
+
+    const normal =
+        document.getElementById(
+            "fachAuswahl"
+        );
+
+
+    const spezial =
+        document.getElementById(
+            "spezialFachAuswahl"
+        );
+
+
+    faecher.forEach(fach => {
+
+
+        const option1 =
+            document.createElement(
+                "option"
+            );
+
+
+        option1.value =
+            fach.name;
+
+
+        option1.textContent =
+            fach.name;
+
+
+        normal.appendChild(
+            option1
+        );
+
+
+
+        const option2 =
+            document.createElement(
+                "option"
+            );
+
+
+        option2.value =
+            fach.name;
+
+
+        option2.textContent =
+            fach.name;
+
+
+        spezial.appendChild(
+            option2
+        );
+
+    });
+
+}
+
+
+
+/* =========================================================
+   STUNDENPLAN ERSTELLEN
+   ========================================================= */
+
+function stundenplanErstellen() {
+
+
+    const tbody =
+        document.getElementById(
+            "stundenplan"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    stunden.forEach(
+
+        (stunde, stundenIndex) => {
+
+
+            const zeile =
+                document.createElement(
+                    "tr"
+                );
+
+
+
+            /* ---------------------------------------------
+               ZEITSPALTE
+               --------------------------------------------- */
+
+            const zeitZelle =
+                document.createElement(
+                    "td"
+                );
+
+
+            zeitZelle.className =
+                "zeit";
+
+
+            zeitZelle.innerHTML = `
+
+                <span class="stunden-nummer">
+
+                    ${stunde.nummer}. Stunde
+
+                </span>
+
+
+                <span class="uhrzeit">
+
+                    ${stunde.von}–${stunde.bis} Uhr
+
+                </span>
+
+            `;
+
+
+            zeile.appendChild(
+                zeitZelle
+            );
+
+
+
+            /* ---------------------------------------------
+               WOCHENTAGE
+               --------------------------------------------- */
+
+            tage.forEach(tag => {
+
+
+                const zelle =
+                    document.createElement(
+                        "td"
+                    );
+
+
+
+                /* -----------------------------------------
+                   MITTAGSPAUSE
+                   ----------------------------------------- */
+
+                if (stunde.mittagspause) {
+
+
+                    const pause =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    pause.className =
+                        "mittagspause";
+
+
+                    pause.textContent =
+                        "Mittagspause";
+
+
+                    zelle.appendChild(
+                        pause
+                    );
+
+
+                    zeile.appendChild(
+                        zelle
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                /* -----------------------------------------
+                   FACH-KASTEN
+                   ----------------------------------------- */
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "fach-kasten leer";
+
+
+
+                const key =
+                    `${tag}-${stundenIndex}`;
+
+
+                const normalesFach =
+                    stundenplan[key];
+
+
+                const spezial =
+                    spezialfaelle[key];
+
+
+
+                /* -----------------------------------------
+                   SPEZIALFALL
+                   ----------------------------------------- */
+
+                if (spezial) {
+
+
+                    button.classList.add(
+                        "spezialfall"
+                    );
+
+
+
+                    /*
+                     * Spezialfach nur anzeigen,
+                     * wenn aktuelle Woche passt.
+                     */
+
+                    if (
+
+                        spezial.woche ===
+                        aktuelleWoche
+
+                    ) {
+
+
+                        const raum =
+                            fachRaum(
+                                spezial.fach
+                            );
+
+
+                        button.innerHTML = `
+
+                            <span class="fach-name">
+
+                                ${spezial.fach}
+
+                            </span>
+
+
+                            ${
+                                raum
+
+                                ? `
+
+                                    <span class="raum">
+
+                                        ${raum}
+
+                                    </span>
+
+                                  `
+
+                                : ""
+
+                            }
+
+                        `;
+
+
+                        button.style.backgroundColor =
+                            fachFarbe(
+                                spezial.fach
+                            );
+
+
+                        button.style.color =
+                            passendeSchriftfarbe(
+                                fachFarbe(
+                                    spezial.fach
+                                )
+                            );
+
+                    }
+
+
+
+                    /* G / U */
+
+                    const marker =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    marker.className =
+                        "wochen-marker";
+
+
+                    marker.textContent =
+
+                        spezial.woche === "gerade"
+
+                            ? "G"
+
+                            : "U";
+
+
+                    button.appendChild(
+                        marker
+                    );
+
+                }
+
+
+
+                /* -----------------------------------------
+                   NORMALES FACH
+                   ----------------------------------------- */
+
+                else if (normalesFach) {
+
+
+                    const raum =
+                        fachRaum(
+                            normalesFach
+                        );
+
+
+                    button.innerHTML = `
+
+                        <span class="fach-name">
+
+                            ${normalesFach}
+
+                        </span>
+
+
+                        ${
+                            raum
+
+                            ? `
+
+                                <span class="raum">
+
+                                    ${raum}
+
+                                </span>
+
+                              `
+
+                            : ""
+
+                        }
+
+                    `;
+
+
+                    button.style.backgroundColor =
+                        fachFarbe(
+                            normalesFach
+                        );
+
+
+                    button.style.color =
+                        passendeSchriftfarbe(
+                            fachFarbe(
+                                normalesFach
+                            )
+                        );
+
+                }
+
+
+
+                /* -----------------------------------------
+                   KLICK
+                   ----------------------------------------- */
+
+                button.addEventListener(
+
+                    "click",
+
+                    function() {
+
+
+                        fachDialogOeffnen(
+
+                            tag,
+
+                            stundenIndex
+
+                        );
+
+                    }
+
+                );
+
+
+                zelle.appendChild(
+                    button
+                );
+
+
+                zeile.appendChild(
+                    zelle
+                );
+
+            });
+
+
+            tbody.appendChild(
+                zeile
+            );
+
+        }
+
+    );
+
+}
+
+
+
+/* =========================================================
+   FACH-DIALOG ÖFFNEN
+   ========================================================= */
+
+function fachDialogOeffnen(
+
+    tag,
+
+    stundenIndex
+
+) {
+
+
+    aktiverTag =
+        tag;
+
+
+    aktiveStunde =
+        stundenIndex;
+
+
+
+    const dialog =
+        document.getElementById(
+            "fachDialog"
+        );
+
+
+    const auswahl =
+        document.getElementById(
+            "fachAuswahl"
+        );
+
+
+    const spezialBereich =
+        document.getElementById(
+            "spezialfallBereich"
+        );
+
+
+    const spezialFach =
+        document.getElementById(
+            "spezialFachAuswahl"
+        );
+
+
+    const spezialWoche =
+        document.getElementById(
+            "spezialWocheAuswahl"
+        );
+
+
+    const info =
+        document.getElementById(
+            "fachInfo"
+        );
+
+
+    const key =
+        `${tag}-${stundenIndex}`;
+
+
+
+    /* Alles zurücksetzen */
+
+    auswahl.value =
+        "";
+
+
+    spezialFach.value =
+        "";
+
+
+    spezialWoche.value =
+        "gerade";
+
+
+    spezialBereich.style.display =
+        "none";
+
+
+
+    /* Spezialfall laden */
+
+    if (
+        spezialfaelle[key]
+    ) {
+
+
+        auswahl.value =
+            "SPEZIALFALL";
+
+
+        spezialBereich.style.display =
+            "block";
+
+
+        spezialFach.value =
+            spezialfaelle[key].fach;
+
+
+        spezialWoche.value =
+            spezialfaelle[key].woche;
+
+    }
+
+
+
+    /* Normales Fach laden */
+
+    else if (
+        stundenplan[key]
+    ) {
+
+
+        auswahl.value =
+            stundenplan[key];
+
+    }
+
+
+
+    info.textContent =
+
+        `${tag}, ` +
+
+        `${stunden[stundenIndex].nummer}. Stunde ` +
+
+        `(${stunden[stundenIndex].von}–` +
+
+        `${stunden[stundenIndex].bis} Uhr)`;
+
+
+    dialog.showModal();
+
+}
+
+
+
+/* =========================================================
+   SPEZIALFALL EIN-/AUSBLENDEN
+   ========================================================= */
+
+document
+
+    .getElementById(
+        "fachAuswahl"
+    )
+
+    .addEventListener(
+
+        "change",
+
+        function() {
+
+
+            const bereich =
+                document.getElementById(
+                    "spezialfallBereich"
+                );
+
+
+            if (
+
+                this.value ===
+                "SPEZIALFALL"
+
+            ) {
+
+
+                bereich.style.display =
+                    "block";
+
+            }
+
+
+            else {
+
+
+                bereich.style.display =
+                    "none";
+
+            }
+
+        }
+
+    );
+
+
+
+/* =========================================================
+   FACH SPEICHERN
+   ========================================================= */
+
+document
+
+    .getElementById(
+        "fachFormular"
+    )
+
+    .addEventListener(
+
+        "submit",
+
+        function(event) {
+
+
+            event.preventDefault();
+
+
+
+            const auswahl =
+                document.getElementById(
+                    "fachAuswahl"
+                ).value;
+
+
+
+            const key =
+                `${aktiverTag}-${aktiveStunde}`;
+
+
+
+            /* ---------------------------------------------
+               KEIN FACH
+               --------------------------------------------- */
+
+            if (
+                auswahl === ""
+            ) {
+
+
+                delete stundenplan[key];
+
+                delete spezialfaelle[key];
+
+            }
+
+
+
+            /* ---------------------------------------------
+               SPEZIALFALL
+               --------------------------------------------- */
+
+            else if (
+
+                auswahl ===
+                "SPEZIALFALL"
+
+            ) {
+
+
+                const spezialFach =
+                    document.getElementById(
+                        "spezialFachAuswahl"
+                    ).value;
+
+
+                const spezialWoche =
+                    document.getElementById(
+                        "spezialWocheAuswahl"
+                    ).value;
+
+
+
+                if (
+                    !spezialFach
+                ) {
+
+
+                    alert(
+                        "Bitte wähle das Fach des Spezialfalls aus."
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                delete stundenplan[key];
+
+
+
+                spezialfaelle[key] = {
+
+
+                    fach:
+                        spezialFach,
+
+
+                    woche:
+                        spezialWoche
+
+                };
+
+            }
+
+
+
+            /* ---------------------------------------------
+               NORMALES FACH
+               --------------------------------------------- */
+
+            else {
+
+
+                stundenplan[key] =
+                    auswahl;
+
+
+                delete spezialfaelle[key];
+
+            }
+
+
+
+            datenSpeichern();
+
+
+            stundenplanErstellen();
+
+
+            document
+                .getElementById(
+                    "fachDialog"
+                )
+                .close();
+
+        }
+
+    );
+
+
+
+/* =========================================================
+   FACH-DIALOG ABBRECHEN
+   ========================================================= */
+
+document
+
+    .getElementById(
+        "fachAbbrechen"
+    )
+
+    .addEventListener(
+
+        "click",
+
+        function() {
+
+
+            document
+                .getElementById(
+                    "fachDialog"
+                )
+                .close();
+
+        }
+
+    );
+
+
+
+/* =========================================================
+   WOCHEN-DIALOG ÖFFNEN
+   ========================================================= */
+
+document
+
+    .getElementById(
+        "wochenAendernButton"
+    )
+
+    .addEventListener(
+
+        "click",
+
+        function() {
+
+
+            document
+                .getElementById(
+                    "wochenAuswahl"
+                )
+                .value =
+                aktuelleWoche;
+
+
+            document
+                .getElementById(
+                    "wochenDialog"
+                )
+                .showModal();
+
+        }
+
+    );
+
+
+
+/* =========================================================
+   WOCHENART SPEICHERN
+   ========================================================= */
+
+document
+
+    .getElementById(
+        "wochenFormular"
+    )
+
+    .addEventListener(
+
+        "submit",
+
+        function(event) {
+
+
+            event.preventDefault();
+
+
+            aktuelleWoche =
+
+                document
+                    .getElementById(
+                        "wochenAuswahl"
+                    )
+                    .value;
+
+
+            datenSpeichern();
+
+
+            wochenanzeigeAktualisieren();
+
+
+            stundenplanErstellen();
+
+
+            document
+                .getElementById(
+                    "wochenDialog"
+                )
+                .close();
+
+        }
+
+    );
+
+
+
+/* =========================================================
+   WOCHEN-DIALOG ABBRECHEN
+   ========================================================= */
+
+document
+
+    .getElementById(
+        "wochenAbbrechen"
+    )
+
+    .addEventListener(
+
+        "click",
+
+        function() {
+
+
+            document
+                .getElementById(
+                    "wochenDialog"
+                )
+                .close();
+
+        }
+
+    );
+
+
+
+/* =========================================================
+   WOCHENANZEIGE
+   ========================================================= */
+
+function wochenanzeigeAktualisieren() {
+
+
+    const anzeige =
+        document.getElementById(
+            "wochenAnzeige"
+        );
+
+
+    if (
+        aktuelleWoche === "gerade"
+    ) {
+
+
+        anzeige.textContent =
+            "Aktuelle Woche: Gerade Woche (G)";
+
+    }
+
+
+    else {
+
+
+        anzeige.textContent =
+            "Aktuelle Woche: Ungerade Woche (U)";
+
+    }
+
+}
+
+
+
+/* =========================================================
+   LEGENDE
+   ========================================================= */
+
+function legendeErstellen() {
+
+
+    const legende =
+        document.getElementById(
+            "legende"
+        );
+
+
+    legende.innerHTML =
+        "";
+
+
+    faecher.forEach(
+        fach => {
+
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+
+            element.className =
+                "legende-fach";
+
+
+            element.textContent =
+                fach.name;
+
+
+            element.style.backgroundColor =
+                fach.farbe;
+
+
+            element.style.color =
+                passendeSchriftfarbe(
+                    fach.farbe
+                );
+
+
+            legende.appendChild(
+                element
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   ZURÜCKSETZEN
+   ========================================================= */
+
+document
+
+    .getElementById(
+        "zuruecksetzenButton"
+    )
+
+    .addEventListener(
+
+        "click",
+
+        function() {
+
+
+            const sicher =
+                confirm(
+
+                    "Möchtest du wirklich " +
+                    "den gesamten Stundenplan löschen?"
+
+                );
+
+
+            if (!sicher) {
+
+                return;
+
+            }
+
+
+            stundenplan =
+                {};
+
+
+            spezialfaelle =
+                {};
+
+
+            datenSpeichern();
+
+
+            stundenplanErstellen();
+
+        }
+
+    );
+
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+datenLaden();
+
+dropdownsFuellen();
+
+wochenanzeigeAktualisieren();
+
+legendeErstellen();
+
+stundenplanErstellen();
+
+
+</script>
+
+</body>
+
+</html>
